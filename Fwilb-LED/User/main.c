@@ -1,5 +1,6 @@
 #include "stm32f10x.h"   // 相当于51单片机中的  #include <reg51.h>
 #include "bsp_led.h"
+#include "bsp_clkconfig.h"
 
 #define SOFT_DELAY		Delay(0x8FFFFF)
 
@@ -8,6 +9,8 @@ void Delay(uint32_t nCount);
 int main(void)
 {
 	// 来到这里的时候，系统的时钟已经被配置成72M。
+	// 修改系统时钟配置 8 * 9 = 72MHz
+	HSE_SetSysClock(RCC_PLLMul_9);
 	/* 初始化 LED GPIO */
 	LED_GPIO_Config();
 	
