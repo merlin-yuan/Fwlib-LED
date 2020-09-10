@@ -1,3 +1,7 @@
+/* 
+ * 使能GPIO端口时钟
+ * 初始化目标引脚为推挽输出模式
+ */
 #include "bsp_led.h"
 
 void LED_GPIO_Config(void)
