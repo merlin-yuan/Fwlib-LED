@@ -19,7 +19,7 @@ void HSE_SetSysClock(uint32_t pllmull)
     RCC_DeInit();
 
     /* 开启 HSE 时钟 */
-    RCC_HSEConfig(CR_HSEON_Set);
+    RCC_HSEConfig(RCC_HSE_ON);
 
     /* 等待 HSE 时钟稳定 */
     HSEStartUpStatus = RCC_WaitForHSEStartUp();

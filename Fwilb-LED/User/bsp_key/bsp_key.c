@@ -1,6 +1,87 @@
 /*
- * ä½¿èƒ½GPIOç«¯å£æ—¶é’Ÿ
- * åˆå§‹åŒ–GPIOç›®æ ‡å¼•è„šä¸ºè¾“å…¥æ¨¡å¼ï¼ˆæµ®ç©ºè¾“å…¥ï¼‰
+ * Ê¹ÄÜGPIO¶Ë¿ÚÊ±ÖÓ
+ * ³õÊ¼»¯GPIOÄ¿±êÒı½ÅÎªÊäÈëÄ£Ê½£¨¸¡¿ÕÊäÈë£©
+ * 
+ * ³õÊ¼»¯ÓÃÀ´²úÉúÖĞ¶ÏµÄGPIO
+ * ³õÊ¼»¯ EXTI
+ * ÅäÖÃ NVIC
+ * ±àĞ´ÖĞ¶Ï·şÎñº¯Êı
  */
 #include "bsp_key.h"
+
+/* ÅäÖÃ NVIC ÖĞ¶ÏÔ´£¬ÓÅÏÈ¼¶£¬Ê¹ÄÜ */
+static void NVIC_Configuration(void)
+{
+	NVIC_InitTypeDef NVIC_InitStructure;
+	
+	/* ÉèÖÃÓÅÏÈ¼¶ */
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+	
+	/* ÅäÖÃÖĞ¶ÏÔ´£º°´¼ü 1 */
+	NVIC_InitStructure.NVIC_IRQChannel = KEY1_INT_EXTI_IRQ;
+	/* ÉèÖÃÇÀÕ¼ÓÅÏÈ¼¶ */
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	/* ÉèÖÃ×ÓÓÅÏÈ¼¶ */
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	/* Ê¹ÄÜÖĞ¶ÏÍ¨µÀ */
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	/* ÅäÖÃÖĞ¶ÏÔ´£º°´¼ü 2 */
+	NVIC_InitStructure.NVIC_IRQChannel = KEY2_INT_EXTI_IRQ;
+	NVIC_Init(&NVIC_InitStructure);
+}
+
+void EXTI_KEY_Config(void)
+{
+	
+	GPIO_InitTypeDef GPIO_InitStructure;
+	EXTI_InitTypeDef EXTI_InitStructure;
+	
+	NVIC_Configuration();
+	
+	/* ³õÊ¼»¯ÓÃÀ´²úÉúÖĞ¶ÏµÄGPIO */
+	RCC_APB2PeriphClockCmd(KEY1_INT_GPIO_CLK | KEY2_INT_GPIO_CLK, ENABLE);
+	
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	/* KEY1 */
+	GPIO_InitStructure.GPIO_Pin = KEY1_INT_GPIO_PIN;
+	GPIO_Init(KEY1_INT_GPIO_PORT, &GPIO_InitStructure);
+	/* KEY2 */
+	GPIO_InitStructure.GPIO_Pin = KEY2_INT_GPIO_PIN;
+	GPIO_Init(KEY2_INT_GPIO_PORT, &GPIO_InitStructure);
+	
+	/* ³õÊ¼»¯ EXTI */
+	/*  EXTI GPIOÔ´ */
+	GPIO_EXTILineConfig(KEY1_INT_EXTI_PORTSOURCE, KEY1_INT_EXTI_PINSOURCE);
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	/* KEY1 */	
+	EXTI_InitStructure.EXTI_Line = KEY1_INT_EXTI_LINE;
+	EXTI_Init(&EXTI_InitStructure);
+	
+	/* KEY2 */
+	GPIO_EXTILineConfig(KEY2_INT_EXTI_PORTSOURCE, KEY2_INT_EXTI_PINSOURCE);
+	EXTI_InitStructure.EXTI_Line = KEY2_INT_EXTI_LINE;
+	EXTI_Init(&EXTI_InitStructure);
+}
+/* ÖĞ¶Ï·şÎñ³ÌĞò */
+uint8_t key_1 = 1, key_2 = 0;
+void KEY1_IRQHandler(void)
+{
+	if (EXTI_GetFlagStatus(KEY1_INT_EXTI_LINE) != RESET)
+	{
+		key_1 ^= 0x01;
+		EXTI_ClearITPendingBit(KEY1_INT_EXTI_LINE);
+	}
+}
+
+void KEY2_IRQHandler(void)
+{
+	if (EXTI_GetFlagStatus(KEY2_INT_EXTI_LINE) != RESET)
+	{
+		key_2 += 0x01;
+		EXTI_ClearITPendingBit(KEY2_INT_EXTI_LINE);
+	}
+}
 
