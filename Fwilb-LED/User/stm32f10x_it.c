@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 
+extern void TimingDelay_Decrement(void);
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -134,6 +135,7 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+	TimingDelay_Decrement();
 }
 
 /******************************************************************************/

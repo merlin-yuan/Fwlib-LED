@@ -2,11 +2,12 @@
 #include "bsp_led.h"
 #include "bsp_key.h"
 #include "bsp_clkconfig.h"
+#include "bsp_systick.h"
+#include "bsp_debug.h"
+#include "bsp_usart.h"
 
-#define SOFT_DELAY		Delay(0x8FFFFF)
+#define SOFT_DELAY		Delay_ms(1000)
 
-
-void Delay(uint32_t nCount);
 
 int main(void)
 {
@@ -14,11 +15,17 @@ int main(void)
 	// 修改系统时钟配置 8 * 9 = 72MHz
 	HSE_SetSysClock(RCC_PLLMul_8);
 //	HSE_SetSysClock(RCC_PLLMul_8);
+	/* 初始化 滴答定时器 */
+	SysTick_Init(); 
+	/* 初始化 USART1 */
+	USART_Config();
 	/* 初始化 LED GPIO */
 	LED_GPIO_Config();
 	/* 初始化 KEY1/KEY2 */
 	EXTI_KEY_Config();
 	
+	
+	Usart_SendString(DEBUG_USARTx, "Light up the led light \r\n");
 	while(1)
 	{
 		/* 验证 按键中断是否起作用 */
@@ -84,11 +91,7 @@ int main(void)
 			LED_BLACK;
 			SOFT_DELAY;
 		}
-		
+	//	DEBUG("Test \r\n");
 	}
 }
 
-void Delay(uint32_t nCount)
-{
-	while(--nCount > 0);
-}
